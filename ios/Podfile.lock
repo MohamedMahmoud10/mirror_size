@@ -1,0 +1,78 @@
+PODS:
+  - camera_avfoundation (0.0.1):
+    - Flutter
+  - device_info_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_native_contact_picker (0.0.1):
+    - Flutter
+  - fluttercontactpicker (4.6.0):
+    - Flutter
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
+  - sensors_plus (0.0.1):
+    - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - tilt (0.0.1):
+    - Flutter
+  - Toast (4.0.0)
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_native_contact_picker (from `.symlinks/plugins/flutter_native_contact_picker/ios`)
+  - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - tilt (from `.symlinks/plugins/tilt/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Toast
+
+EXTERNAL SOURCES:
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  Flutter:
+    :path: Flutter
+  flutter_native_contact_picker:
+    :path: ".symlinks/plugins/flutter_native_contact_picker/ios"
+  fluttercontactpicker:
+    :path: ".symlinks/plugins/fluttercontactpicker/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
+  sensors_plus:
+    :path: ".symlinks/plugins/sensors_plus/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  tilt:
+    :path: ".symlinks/plugins/tilt/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
+
+SPEC CHECKSUMS:
+  camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
+  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_native_contact_picker: bd430ba0fbf82768bb50c2c52a69a65759a8f907
+  fluttercontactpicker: d582836dea6b5d489f3d259f35d7817ae82ee5e6
+  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
+  sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
+  tilt: 7409aad7ca82ef172a40d8f275d2534ce7b9c79b
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+  webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
+
+PODFILE CHECKSUM: f671ba62bfaa592a6de0fbc99e35343cdaca1754
+
+COCOAPODS: 1.12.1
