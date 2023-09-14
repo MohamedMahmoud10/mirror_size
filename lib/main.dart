@@ -9,6 +9,5 @@ void main() async {
   Bloc.observer = MyBlocObserver();
   await configureDependencies();
 
-
   runApp(const MyApp());
 }

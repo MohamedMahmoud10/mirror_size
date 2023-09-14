@@ -4,7 +4,7 @@ import 'package:mirror_size/app/feat/init_mirror_size_user/data/data_source/remo
 import 'package:mirror_size/app/feat/init_mirror_size_user/data/mapper/init_user_response_mapper.dart';
 import 'package:mirror_size/app/feat/init_mirror_size_user/domain/base_repo/init_user_base_repo.dart';
 import 'package:mirror_size/app/feat/init_mirror_size_user/domain/entity/init_user_response_entity.dart';
-import 'package:mirror_size/core/error_handler/faliure.dart';
+import 'package:mirror_size/core/error_handler/index.dart';
 
 @LazySingleton(as: InitUserBaseRepo)
 class InitUserRepo implements InitUserBaseRepo {

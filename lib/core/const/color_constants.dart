@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ColorConstants {
   //These Colors For Gradient Colors In All the Application
-  static const primaryColor = Color(0xFF024DA1);
+  static const primaryColor = Color(0xFF3A685D);
   static const secondaryColor = Color(0xFFF22E52);
   static const whiteColor = Color(0xFFFFFFFF);
   static const blackColor = Color(0xFF121212);

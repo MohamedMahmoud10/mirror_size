@@ -5,7 +5,7 @@ import 'package:mirror_size/app/feat/get_measurment_size/data/mapper/get_measure
 import 'package:mirror_size/app/feat/get_measurment_size/domain/base_repo/get_measurement_base_repo.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/entity/get_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/entity/get_measurement_response_entity.dart';
-import 'package:mirror_size/core/error_handler/faliure.dart';
+import 'package:mirror_size/core/error_handler/index.dart';
 
 @LazySingleton(as: GetMeasurementBaseRepo)
 class GetMeasurementRepo implements GetMeasurementBaseRepo {

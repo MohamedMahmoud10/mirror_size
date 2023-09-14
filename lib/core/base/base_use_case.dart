@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:mirror_size/core/error_handler/faliure.dart';
+import 'package:mirror_size/core/error_handler/index.dart';
 
 /// Base class for all use cases
 /// [Type] is the return type of the use case

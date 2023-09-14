@@ -6,11 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
+import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/domain/entity/upload_body_measurement_request_entity.dart';
+import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/entity/get_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_state.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/screens/camera_screen/widgets/bottom_sheet.dart';
-import 'package:mirror_size/app/feat/get_measurment_size/presentation/screens/user_measurement_screen/user_measurement_screen.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/entity/get_recommendation_measurement_request_entity.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_state.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/screens/kota.dart';
 import 'package:mirror_size/core/const/app_strings.dart';
 import 'package:mirror_size/core/const/cache_strings.dart';
 import 'package:mirror_size/core/di/index.dart';
@@ -31,7 +36,7 @@ class _CameraWidgetState extends State<CameraWidget> {
   bool isTimerActive = false; // To check if the timer has already started
   int? secondsLeft;
   int step =
-  1; // Track the current step (1 for first photo, 2 for second photo)
+      1; // Track the current step (1 for first photo, 2 for second photo)
   double dynamicAngle = 0.0; // Initialize with a default value
   bool isFirstPhotoTaken = false;
   bool isSecondPhotoTaken = false;
@@ -49,11 +54,9 @@ class _CameraWidgetState extends State<CameraWidget> {
     try {
       cameras = await availableCameras();
       controller = CameraController(
-        cameras[1],
-        ResolutionPreset.ultraHigh,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
-
-
+        cameras[0],
+        ResolutionPreset.high,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
       await controller!.initialize();
       setState(() {});
@@ -144,9 +147,11 @@ class _CameraWidgetState extends State<CameraWidget> {
       debugPrint('Error capturing first photo: $e');
     }
   }
+
   Future<void> takeSecondPhoto() async {
     try {
-      if (controller != null && !isSecondPhotoInProgress) { // Check the flag
+      if (controller != null && !isSecondPhotoInProgress) {
+        // Check the flag
         // Capture side photo (second photo)
         final XFile sidePhoto = await controller!.takePicture();
         sidePhotoPath = sidePhoto.path;
@@ -167,6 +172,7 @@ class _CameraWidgetState extends State<CameraWidget> {
       debugPrint('Error capturing second photo: $e');
     }
   }
+
   Future<String> convertFileToBase64(File file) async {
     final List<int> bytes = await file.readAsBytes();
     final String base64String = base64Encode(bytes);
@@ -182,16 +188,16 @@ class _CameraWidgetState extends State<CameraWidget> {
     final compressedImage = img.encodeJpg(image, quality: compressedQuality);
 
     final compressedFile =
-    File(imageFile.path.replaceAll('.jpg', '_compressed.jpg'));
+        File(imageFile.path.replaceAll('.jpg', '_compressed.jpg'));
     await compressedFile.writeAsBytes(compressedImage);
 
     return compressedFile;
   }
 
   Future<void> sendRequestWithImages(
-      String frontPhotoPath,
-      String sidePhotoPath,
-      ) async {
+    String frontPhotoPath,
+    String sidePhotoPath,
+  ) async {
     final cubit = BlocProvider.of<GetUserMeasurementCubit>(context);
     final cacheUserId = di<SharedPreferences>().get(CacheString.userIdKey);
 
@@ -210,7 +216,8 @@ class _CameraWidgetState extends State<CameraWidget> {
     final sideImageBytes = compressedSidePhoto.readAsBytesSync();
     final base64FrontImage = base64Encode(frontImageBytes);
     final base64SideImage = base64Encode(sideImageBytes);
-    final String? cachedDeviceName= di<SharedPreferences>().getString(CacheString.deviceNameKey);
+    final String? cachedDeviceName =
+        di<SharedPreferences>().getString(CacheString.deviceNameKey);
 
     final jsonBody = GetMeasurementRequestEntity(
       userId: cacheUserId.toString(),
@@ -224,7 +231,7 @@ class _CameraWidgetState extends State<CameraWidget> {
       userName: cubit.userName,
       userMobile: "7206422605",
       apiKey: AppString.apiKey,
-      mobileModel: cachedDeviceName??'12ProMax',
+      mobileModel: cachedDeviceName ?? '12ProMax',
       fitType: "Loosefit",
       merchantId: AppString.merchantID,
       frontImage: base64FrontImage,
@@ -268,7 +275,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     Widget contentWidget;
     if (tiltAngle >= 86 && tiltAngle <= 90) {
       contentWidget =
-      const SizedBox(); // Empty container when not in the specified range
+          const SizedBox(); // Empty container when not in the specified range
     } else {
       contentWidget = Align(
         alignment: Alignment.bottomCenter,
@@ -324,18 +331,90 @@ class _CameraWidgetState extends State<CameraWidget> {
           contentWidget,
           BlocBuilder<GetUserMeasurementCubit, GetUserMeasurementState>(
             builder: (context, state) {
+              bool alreadyFiredNewRequest = false; // Declare the flag here
+
               if (state is GetUserMeasurementLoadingState) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               } else if (state is GetUserMeasurementLoadedState) {
+                final cacheUserId =
+                    di<SharedPreferences>().get(CacheString.userIdKey);
+
                 return ModalBottomSheetDemo(
                   message: state.responseEntity.message,
                   onClose: () {
+                    if (state.responseEntity.code == '1' &&
+                        !alreadyFiredNewRequest &&
+                        state.responseEntity.message == 'complete') {
+                      alreadyFiredNewRequest =
+                          true; // Set the flag to prevent multiple requests
+
+                      // Fire your network request here
+                      BlocProvider.of<GetRecommendationCubit>(context)
+                          .getUserBodyMeasurement(
+                        GetRecommendationMeasurementRequestEntity(
+                          apiKey: AppString.apiKey,
+                          apparelName: 'Kandora',
+                          brandName: 'CanCan',
+                          merchantId: AppString.merchantID,
+                          productName: "GET_MEASURED",
+                          gender: AppString.gender,
+                          userId: cacheUserId.toString(),
+                        ),
+                      );
+                    }
+                    BlocListener(
+                      listener: (BuildContext context, state) {
+                        if (state is GetRecommendationSizeSuccessState) {
+                          BlocProvider.of<UplaodBodyMeasurementCubit>(context)
+                              .getUserBodyMeasurement(
+                            UploadBodyMeasurementRequestEntity(
+                              internalUserId: '',
+                              shopifyUserId: '',
+                              values: [
+                                ValuesEntity(
+                                  title: [
+                                    state.responseEntity.measurementData
+                                            ?.stomach ??
+                                        ''
+                                  ],
+                                  measurementType: [
+                                    state.responseEntity.measurementData
+                                            ?.upperNeck ??
+                                        ''
+                                  ],
+                                  kandoraLength: [
+                                    double.tryParse(
+                                          state.responseEntity.measurementData
+                                                  ?.armsLength ??
+                                              '',
+                                        ) ??
+                                        0.0
+                                  ],
+                                  chest: [
+                                    double.tryParse(
+                                          state.responseEntity.measurementData
+                                                  ?.chest ??
+                                              '',
+                                        ) ??
+                                        0.0
+                                  ],
+                                  lowHip: [],
+                                  shoulder: [],
+                                  wrist: [],
+                                  waist: [],
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const UserMeasurementScreen(),
+                        builder: (context) => const Kota(),
                       ),
                     );
                   },
@@ -343,7 +422,6 @@ class _CameraWidgetState extends State<CameraWidget> {
               } else {
                 return Container();
               }
-              return Container();
             },
           ),
         ],

@@ -15,14 +15,14 @@ import 'package:mirror_size/core/const/cache_strings.dart';
 import 'package:mirror_size/core/di/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UserMeasurementView extends StatefulWidget {
-  const UserMeasurementView({super.key});
+class AddUserMeasurementView extends StatefulWidget {
+  const AddUserMeasurementView({super.key});
 
   @override
-  State<UserMeasurementView> createState() => _UserMeasurementViewState();
+  State<AddUserMeasurementView> createState() => _AddUserMeasurementViewState();
 }
 
-class _UserMeasurementViewState extends State<UserMeasurementView> {
+class _AddUserMeasurementViewState extends State<AddUserMeasurementView> {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
   IosDeviceInfo? data;
@@ -30,6 +30,7 @@ class _UserMeasurementViewState extends State<UserMeasurementView> {
   String? deviceId;
   final deviceName = DeviceName();
   String? iosDeviceName;
+  String? adnroidDeviceName;
 
   Future<void> initDeviceInfo() async {
     if (Platform.isIOS) {
@@ -50,8 +51,6 @@ class _UserMeasurementViewState extends State<UserMeasurementView> {
       androidData = await deviceInfoPlugin.androidInfo;
       deviceId = data?.utsname.machine ?? '';
       debugPrint('The Device Id Is $deviceId');
-      iosDeviceName = await deviceName.apple(deviceId);
-      debugPrint('device name is $iosDeviceName');
       if (iosDeviceName != null && iosDeviceName!.isNotEmpty) {
         await di<SharedPreferences>()
             .setString(CacheString.deviceNameKey, iosDeviceName!);

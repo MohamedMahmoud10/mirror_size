@@ -39,6 +39,7 @@ dependencies:
   camera: ^0.10.5+4
   image: ^4.0.17
   tilt: ^0.0.2
+  cached_network_image: ^3.2.3
 
 
   # Dependency Injection service locator
@@ -74,6 +75,8 @@ dependencies:
   http: ^0.13.4
   device_name: ^0.0.4
   device_info_plus: ^9.0.3
+  carousel_slider: ^4.2.1
+  dotted_border: ^2.0.0+3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -108,6 +111,7 @@ dev_dependencies:
   # Code generator package for go_router which allows you to easily generate routes.
   go_router_builder: ^2.1.1
   flutter_gen_runner: ^5.3.1
+  form_builder_validators: ^9.0.0
   # Important: Used to generate localization manually in case it's not generated automatically
   # `dart run intl_utils:generate`
   intl_utils: ^2.8.3
@@ -160,17 +164,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
+  fonts:
+    - family: Arial
+      fonts:
+        - asset: assets/fonts/Arialn.ttf
+          weight: 900
+        - asset: assets/fonts/ARIBL0.ttf
+          weight: 700
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

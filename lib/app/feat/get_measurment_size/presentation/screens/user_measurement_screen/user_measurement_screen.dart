@@ -8,7 +8,7 @@ class UserMeasurementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return  const SafeArea(
       child: Scaffold(
-        body: UserMeasurementView(),
+        body: AddUserMeasurementView(),
       ),
     );
   }
