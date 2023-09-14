@@ -8,11 +8,16 @@ import 'package:mirror_size/app/feat/custom_products/presentation/cubits/custom_
 import 'package:mirror_size/app/feat/custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/use_case/user_measurement_use_case.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_cubit.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/data/model/get_recommendation_request_model.dart';
+import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/entity/get_recommendation_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/use_case/get_recommendation_use_case.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/init_mirror_size_user/domain/use_case/user_init_use_case.dart';
 import 'package:mirror_size/app/feat/init_mirror_size_user/presentation/cubit/init_user_cubit.dart';
+import 'package:mirror_size/core/const/app_strings.dart';
+import 'package:mirror_size/core/const/cache_strings.dart';
 import 'package:mirror_size/core/di/index.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,6 +30,8 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       // Use builder only if you need to use library outside ScreenUtilInit context
       builder: (context, child) {
+        final cacheUserId = di<SharedPreferences>().get(CacheString.userIdKey);
+
         return MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -45,7 +52,17 @@ class MyApp extends StatelessWidget {
             BlocProvider<GetRecommendationCubit>(
               create: (context) => GetRecommendationCubit(
                 useCase: di<GetRecommendationUseCase>(),
-              ),
+              )..getUserBodyMeasurement(
+                  GetRecommendationMeasurementRequestEntity(
+                    apiKey: AppString.apiKey,
+                    apparelName: 'Kandora',
+                    brandName: 'CanCan',
+                    merchantId: AppString.merchantID,
+                    productName: "GET_MEASURED",
+                    gender: AppString.gender,
+                    userId: cacheUserId.toString(),
+                  ),
+                ),
             ),
             BlocProvider<UplaodBodyMeasurementCubit>(
               create: (context) => UplaodBodyMeasurementCubit(

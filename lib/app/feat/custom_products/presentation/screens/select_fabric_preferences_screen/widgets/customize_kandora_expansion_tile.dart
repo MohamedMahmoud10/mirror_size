@@ -42,7 +42,7 @@ class _CustomizeKandoraExpansionTileState
               final defaultValueEntity = pref.values?.firstWhere(
                     (valueEntity) => valueEntity.def == true,
               );
-              final defaultValue = defaultValueEntity?.valueAr ?? '';
+              final defaultValue = defaultValueEntity?.valueEn ?? '';
 
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 8.0), // Add margin for spacing

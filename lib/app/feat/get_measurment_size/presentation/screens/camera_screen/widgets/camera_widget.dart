@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
 import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/domain/entity/upload_body_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
+import 'package:mirror_size/app/feat/custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/entity/get_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_state.dart';
@@ -50,13 +51,15 @@ class _CameraWidgetState extends State<CameraWidget> {
     initializeCamera();
   }
 
+  StreamSubscription<Tilt>? tiltSubscription;
+
   Future<void> initializeCamera() async {
     try {
       cameras = await availableCameras();
       controller = CameraController(
-        cameras[0],
+        cameras[1],
         ResolutionPreset.high,
-        imageFormatGroup: ImageFormatGroup.jpeg,
+        imageFormatGroup: ImageFormatGroup.bgra8888,
       );
       await controller!.initialize();
       setState(() {});
@@ -70,6 +73,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     DeviceTilt(
       initialTilt: const Tilt(90, 90),
     ).stream.listen((tilt) {
+      if (!mounted) return; // Check if the widget is still mounted
       tiltAngle = tilt.xRadian * (180 / 3.14159265359);
 
       if (tiltAngle >= 86 && tiltAngle <= 90 && !isTimerActive && step == 1) {
@@ -79,6 +83,8 @@ class _CameraWidgetState extends State<CameraWidget> {
         isTimerActive = true;
         secondsLeft = 5;
         captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (!mounted) return; // Check if the widget is still mounted
+
           setState(() {
             secondsLeft = secondsLeft != null ? secondsLeft! - 1 : null;
             if (secondsLeft! <= 0) {
@@ -246,6 +252,8 @@ class _CameraWidgetState extends State<CameraWidget> {
   void dispose() {
     controller?.dispose();
     captureTimer?.cancel();
+    // Cancel the tilt listener here if you have a way to do that
+    // tiltSubscription?.cancel(); // Cancel the tilt subscription here
     super.dispose();
   }
 
@@ -329,101 +337,146 @@ class _CameraWidgetState extends State<CameraWidget> {
               ),
             ),
           contentWidget,
-          BlocBuilder<GetUserMeasurementCubit, GetUserMeasurementState>(
-            builder: (context, state) {
-              bool alreadyFiredNewRequest = false; // Declare the flag here
+          MultiBlocListener(
+              listeners: [
+                BlocListener<GetUserMeasurementCubit, GetUserMeasurementState>(
+                    listener: (context, state) {
+                  const bool alreadyFiredNewRequest =
+                      false; // Declare the flag here
 
-              if (state is GetUserMeasurementLoadingState) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (state is GetUserMeasurementLoadedState) {
-                final cacheUserId =
-                    di<SharedPreferences>().get(CacheString.userIdKey);
+                  // if (state is GetUserMeasurementLoadingState) {
+                  //   return const Center(
+                  //     child: CircularProgressIndicator(),
+                  //   );
+                  // }
+                  if (state is GetUserMeasurementLoadedState) {
+                    final cacheUserId =
+                        di<SharedPreferences>().get(CacheString.userIdKey);
 
-                return ModalBottomSheetDemo(
-                  message: state.responseEntity.message,
-                  onClose: () {
                     if (state.responseEntity.code == '1' &&
                         !alreadyFiredNewRequest &&
                         state.responseEntity.message == 'complete') {
-                      alreadyFiredNewRequest =
-                          true; // Set the flag to prevent multiple requests
-
-                      // Fire your network request here
-                      BlocProvider.of<GetRecommendationCubit>(context)
-                          .getUserBodyMeasurement(
-                        GetRecommendationMeasurementRequestEntity(
-                          apiKey: AppString.apiKey,
-                          apparelName: 'Kandora',
-                          brandName: 'CanCan',
-                          merchantId: AppString.merchantID,
-                          productName: "GET_MEASURED",
-                          gender: AppString.gender,
-                          userId: cacheUserId.toString(),
+                      // BlocProvider.of<GetRecommendationCubit>(context)
+                      //           .getUserBodyMeasurement(
+                      //         GetRecommendationMeasurementRequestEntity(
+                      //           apiKey: AppString.apiKey,
+                      //           apparelName: 'Kandora',
+                      //           brandName: 'CanCan',
+                      //           merchantId: AppString.merchantID,
+                      //           productName: "GET_MEASURED",
+                      //           gender: AppString.gender,
+                      //           userId: cacheUserId.toString(),
+                      //         ),
+                      //       );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Kota(),
+                        ),
+                      );
+                    } else {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CustomizeKandoraScreen(),
                         ),
                       );
                     }
-                    BlocListener(
-                      listener: (BuildContext context, state) {
-                        if (state is GetRecommendationSizeSuccessState) {
-                          BlocProvider.of<UplaodBodyMeasurementCubit>(context)
-                              .getUserBodyMeasurement(
-                            UploadBodyMeasurementRequestEntity(
-                              internalUserId: '',
-                              shopifyUserId: '',
-                              values: [
-                                ValuesEntity(
-                                  title: [
-                                    state.responseEntity.measurementData
-                                            ?.stomach ??
-                                        ''
-                                  ],
-                                  measurementType: [
-                                    state.responseEntity.measurementData
-                                            ?.upperNeck ??
-                                        ''
-                                  ],
-                                  kandoraLength: [
-                                    double.tryParse(
-                                          state.responseEntity.measurementData
-                                                  ?.armsLength ??
-                                              '',
-                                        ) ??
-                                        0.0
-                                  ],
-                                  chest: [
-                                    double.tryParse(
-                                          state.responseEntity.measurementData
-                                                  ?.chest ??
-                                              '',
-                                        ) ??
-                                        0.0
-                                  ],
-                                  lowHip: [],
-                                  shoulder: [],
-                                  wrist: [],
-                                  waist: [],
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Kota(),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
+
+                    // return ModalBottomSheetDemo(
+                    //   message: state.responseEntity.message,
+                    //   onClose: () {
+                    //     if (state.responseEntity.code == '1' &&
+                    //         !alreadyFiredNewRequest &&
+                    //         state.responseEntity.message == 'complete') {
+                    //       alreadyFiredNewRequest =
+                    //           true; // Set the flag to prevent multiple requests
+                    //
+                    //       // Fire your network request here
+                    //       BlocProvider.of<GetRecommendationCubit>(context)
+                    //           .getUserBodyMeasurement(
+                    //         GetRecommendationMeasurementRequestEntity(
+                    //           apiKey: AppString.apiKey,
+                    //           apparelName: 'Kandora',
+                    //           brandName: 'CanCan',
+                    //           merchantId: AppString.merchantID,
+                    //           productName: "GET_MEASURED",
+                    //           gender: AppString.gender,
+                    //           userId: cacheUserId.toString(),
+                    //         ),
+                    //       );
+                    //     }
+                    //     BlocListener(
+                    //       listener: (BuildContext context, state) {
+                    //         if (state is GetRecommendationSizeSuccessState) {
+                    //           final cacheUserId =
+                    //           di<SharedPreferences>().get(CacheString.userIdKey);
+                    //
+                    //           BlocProvider.of<UplaodBodyMeasurementCubit>(context)
+                    //               .getUserBodyMeasurement(
+                    //             UploadBodyMeasurementRequestEntity(
+                    //               internalUserId: cacheUserId.toString(),
+                    //               shopifyUserId: cacheUserId.toString(),
+                    //               values: [
+                    //                 ValuesEntity(
+                    //                   title: [
+                    //                     state.responseEntity.measurementData
+                    //                             ?.stomach ??
+                    //                         ''
+                    //                   ],
+                    //                   measurementType: [
+                    //                     state.responseEntity.measurementData
+                    //                             ?.upperNeck ??
+                    //                         ''
+                    //                   ],
+                    //                   kandoraLength: [
+                    //                     double.tryParse(
+                    //                           state.responseEntity.measurementData
+                    //                                   ?.armsLength ??
+                    //                               '',
+                    //                         ) ??
+                    //                         0.0
+                    //                   ],
+                    //                   chest: [
+                    //                     double.tryParse(
+                    //                           state.responseEntity.measurementData
+                    //                                   ?.chest ??
+                    //                               '',
+                    //                         ) ??
+                    //                         0.0
+                    //                   ],
+                    //                   lowHip: [],
+                    //                   shoulder: [],
+                    //                   wrist: [],
+                    //                   waist: [],
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           );
+                    //         }
+                    //       },
+                    //     );
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) => const Kota(),
+                    //       ),
+                    //     );
+                    //   },
+                    //);
+                    //   } else {
+                    //     return Container();
+                    //   }
+                    //   return const Center(
+                    //     child: CircularProgressIndicator(),
+                    //   );
+                    // },
+                  }
+                },),
+              ],
+              child: const Center(
+                child: CircularProgressIndicator.adaptive(),
+              ),)
         ],
       ),
     );
