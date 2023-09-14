@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/domain/entity/upload_body_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
+import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_state.dart';
 import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/screens/upload_user_measurement/widgets/upload_user_measurement_form.dart';
+import 'package:mirror_size/app/feat/custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/screens/user_measurement_screen/user_measurement_screen.dart';
 import 'package:mirror_size/core/common_widgets/custom_elevated_button.dart';
 
@@ -64,10 +67,41 @@ class UploadUserMeasurementView extends StatelessWidget {
         child: Column(
           children: [
             const UploadUserMeasurementForm(),
-            CustomElevatedButton(
-              text: 'Enter',
-              onPressed: () => onPressed(),
-              color: Colors.red,
+            SizedBox(
+              height: 20.h,
+            ),
+            BlocConsumer<UplaodBodyMeasurementCubit,
+                UploadBodyMeasurementState>(
+              listener: (context, state) {
+                if (state is UploadBodyMeasurementSuccessState) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Success'),
+                    ),
+                  );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CustomizeKandoraScreen(),
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is UploadBodyMeasurementLoadingState) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+                return CustomElevatedButton(
+                  text: 'Enter',
+                  onPressed: () => onPressed(),
+                  color: Colors.red,
+                );
+              },
+            ),
+            SizedBox(
+              height: 20.h,
             ),
             CustomElevatedButton(
               text: 'Use Ai',

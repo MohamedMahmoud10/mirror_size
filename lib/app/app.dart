@@ -8,7 +8,6 @@ import 'package:mirror_size/app/feat/custom_products/presentation/cubits/custom_
 import 'package:mirror_size/app/feat/custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/use_case/user_measurement_use_case.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_cubit.dart';
-import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/data/model/get_recommendation_request_model.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/entity/get_recommendation_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/use_case/get_recommendation_use_case.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';

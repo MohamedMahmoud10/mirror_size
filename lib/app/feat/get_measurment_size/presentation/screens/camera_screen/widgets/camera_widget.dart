@@ -6,16 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
-import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/domain/entity/upload_body_measurement_request_entity.dart';
-import 'package:mirror_size/app/feat/body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/domain/entity/get_measurement_request_entity.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_cubit.dart';
 import 'package:mirror_size/app/feat/get_measurment_size/presentation/cubit/get_measurement/get_user_measurement_state.dart';
-import 'package:mirror_size/app/feat/get_measurment_size/presentation/screens/camera_screen/widgets/bottom_sheet.dart';
-import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/domain/entity/get_recommendation_measurement_request_entity.dart';
-import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';
-import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_state.dart';
 import 'package:mirror_size/app/feat/get_user_measurement_from_mirroir_size/presentation/screens/kota.dart';
 import 'package:mirror_size/core/const/app_strings.dart';
 import 'package:mirror_size/core/const/cache_strings.dart';
@@ -59,7 +53,7 @@ class _CameraWidgetState extends State<CameraWidget> {
       controller = CameraController(
         cameras[1],
         ResolutionPreset.high,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
       await controller!.initialize();
       setState(() {});
@@ -338,9 +332,9 @@ class _CameraWidgetState extends State<CameraWidget> {
             ),
           contentWidget,
           MultiBlocListener(
-              listeners: [
-                BlocListener<GetUserMeasurementCubit, GetUserMeasurementState>(
-                    listener: (context, state) {
+            listeners: [
+              BlocListener<GetUserMeasurementCubit, GetUserMeasurementState>(
+                listener: (context, state) {
                   const bool alreadyFiredNewRequest =
                       false; // Declare the flag here
 
@@ -374,11 +368,23 @@ class _CameraWidgetState extends State<CameraWidget> {
                           builder: (context) => const Kota(),
                         ),
                       );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text(state.responseEntity.message+state.responseEntity.code),
+                        ),
+                      );
                     } else {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const CustomizeKandoraScreen(),
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(state.responseEntity.message+state.responseEntity.code),
                         ),
                       );
                     }
@@ -472,11 +478,13 @@ class _CameraWidgetState extends State<CameraWidget> {
                     //   );
                     // },
                   }
-                },),
-              ],
-              child: const Center(
-                child: CircularProgressIndicator.adaptive(),
-              ),)
+                },
+              ),
+            ],
+            child: const Center(
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          )
         ],
       ),
     );

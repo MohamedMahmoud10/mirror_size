@@ -721,7 +721,7 @@ mixin _$ValuesResponseModel {
   String? get valueEn => throw _privateConstructorUsedError;
   @JsonKey(name: 'value_ar')
   String? get valueAr => throw _privateConstructorUsedError;
-  @JsonKey(name: 'default')
+  @JsonKey(name: 'Default')
   bool? get def => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -738,7 +738,7 @@ abstract class $ValuesResponseModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'value_en') String? valueEn,
       @JsonKey(name: 'value_ar') String? valueAr,
-      @JsonKey(name: 'default') bool? def});
+      @JsonKey(name: 'Default') bool? def});
 }
 
 /// @nodoc
@@ -786,7 +786,7 @@ abstract class _$$_ValuesResponseModelCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'value_en') String? valueEn,
       @JsonKey(name: 'value_ar') String? valueAr,
-      @JsonKey(name: 'default') bool? def});
+      @JsonKey(name: 'Default') bool? def});
 }
 
 /// @nodoc
@@ -827,7 +827,7 @@ class _$_ValuesResponseModel implements _ValuesResponseModel {
   const _$_ValuesResponseModel(
       {@JsonKey(name: 'value_en') this.valueEn = '',
       @JsonKey(name: 'value_ar') this.valueAr = '',
-      @JsonKey(name: 'default') this.def = true});
+      @JsonKey(name: 'Default') this.def = true});
 
   factory _$_ValuesResponseModel.fromJson(Map<String, dynamic> json) =>
       _$$_ValuesResponseModelFromJson(json);
@@ -839,7 +839,7 @@ class _$_ValuesResponseModel implements _ValuesResponseModel {
   @JsonKey(name: 'value_ar')
   final String? valueAr;
   @override
-  @JsonKey(name: 'default')
+  @JsonKey(name: 'Default')
   final bool? def;
 
   @override
@@ -873,7 +873,7 @@ abstract class _ValuesResponseModel implements ValuesResponseModel {
   const factory _ValuesResponseModel(
       {@JsonKey(name: 'value_en') final String? valueEn,
       @JsonKey(name: 'value_ar') final String? valueAr,
-      @JsonKey(name: 'default') final bool? def}) = _$_ValuesResponseModel;
+      @JsonKey(name: 'Default') final bool? def}) = _$_ValuesResponseModel;
 
   factory _ValuesResponseModel.fromJson(Map<String, dynamic> json) =
       _$_ValuesResponseModel.fromJson;
@@ -885,7 +885,7 @@ abstract class _ValuesResponseModel implements ValuesResponseModel {
   @JsonKey(name: 'value_ar')
   String? get valueAr;
   @override
-  @JsonKey(name: 'default')
+  @JsonKey(name: 'Default')
   bool? get def;
   @override
   @JsonKey(ignore: true)

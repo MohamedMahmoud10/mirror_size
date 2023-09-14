@@ -12,6 +12,7 @@ class UplaodBodyMeasurementCubit extends Cubit<UploadBodyMeasurementState> {
       UploadBodyMeasurementRequestEntity requestEntity,
   ) async {
     final result = await useCase.call(requestEntity);
+    emit(UploadBodyMeasurementLoadingState());
     result.fold(
       (l) => emit(
         UploadBodyMeasurementFailState(

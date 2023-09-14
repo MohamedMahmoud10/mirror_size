@@ -65,7 +65,7 @@ class _CustomizeKandoraExpansionTileState
                     child: Row(
                       children: [
                         Text(
-                          defaultValue,
+                          pref.values?[selectedValues[index] ?? 0].valueAr ?? '',
                           style: const TextStyle(fontSize: 18),
                         ),
                         if (state[index] ?? false)
