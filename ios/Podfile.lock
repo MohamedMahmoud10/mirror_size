@@ -4,39 +4,36 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_native_contact_picker (0.0.1):
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - path_provider_foundation (0.0.1):
     - Flutter
-  - fluttercontactpicker (4.6.0):
-    - Flutter
-  - fluttertoast (0.0.2):
-    - Flutter
-    - Toast
+    - FlutterMacOS
   - sensors_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - tilt (0.0.1):
+  - sqflite (0.0.3):
     - Flutter
-  - Toast (4.0.0)
-  - webview_flutter_wkwebview (0.0.1):
+    - FMDB (>= 2.7.5)
+  - tilt (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
-  - flutter_native_contact_picker (from `.symlinks/plugins/flutter_native_contact_picker/ios`)
-  - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - sensors_plus (from `.symlinks/plugins/sensors_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - tilt (from `.symlinks/plugins/tilt/ios`)
-  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/ios`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
-    - Toast
+    - FMDB
 
 EXTERNAL SOURCES:
   camera_avfoundation:
@@ -45,33 +42,27 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
-  flutter_native_contact_picker:
-    :path: ".symlinks/plugins/flutter_native_contact_picker/ios"
-  fluttercontactpicker:
-    :path: ".symlinks/plugins/fluttercontactpicker/ios"
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   sensors_plus:
     :path: ".symlinks/plugins/sensors_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
   tilt:
     :path: ".symlinks/plugins/tilt/ios"
-  webview_flutter_wkwebview:
-    :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
   camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_native_contact_picker: bd430ba0fbf82768bb50c2c52a69a65759a8f907
-  fluttercontactpicker: d582836dea6b5d489f3d259f35d7817ae82ee5e6
-  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   sensors_plus: 5717760720f7e6acd96fdbd75b7428f5ad755ec2
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
+  sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   tilt: 7409aad7ca82ef172a40d8f275d2534ce7b9c79b
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
-  webview_flutter_wkwebview: b7e70ef1ddded7e69c796c7390ee74180182971f
 
 PODFILE CHECKSUM: f671ba62bfaa592a6de0fbc99e35343cdaca1754
 
