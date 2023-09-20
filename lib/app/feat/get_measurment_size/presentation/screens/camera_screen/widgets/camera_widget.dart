@@ -18,6 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilt/tilt.dart'; // Import the image package
 
 class CameraWidget extends StatefulWidget {
+  const CameraWidget({super.key});
+
   @override
   _CameraWidgetState createState() => _CameraWidgetState();
 }
@@ -31,13 +33,37 @@ class _CameraWidgetState extends State<CameraWidget> {
   bool isTimerActive = false; // To check if the timer has already started
   int? secondsLeft;
   int step =
-      1; // Track the current step (1 for first photo, 2 for second photo)
+  1; // Track the current step (1 for first photo, 2 for second photo)
   double dynamicAngle = 0.0; // Initialize with a default value
   bool isFirstPhotoTaken = false;
   bool isSecondPhotoTaken = false;
   String? frontPhotoPath;
   String? sidePhotoPath;
   bool isSecondPhotoInProgress = false; // Add this flag
+  bool isAlertActive = false; // Add this new flag
+  bool isCapturing = false; // Add this flag
+  bool isTiltInRange = false; // Add this flag
+
+  void showAlertDialog() {
+    if (!isTiltInRange) {
+      // Show the alert dialog when the phone tilt is not in the specified range
+      if (!isAlertActive) {
+        isAlertActive = true; // Set the flag to true before showing the alert
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const InstructionsAlertDialog(),
+        );
+      }
+    } else {
+      // Dismiss the alert dialog if it's currently active
+      if (isAlertActive) {
+        Navigator.of(context).pop();
+        isAlertActive = false; // Reset the flag after dismissing the alert
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -51,15 +77,14 @@ class _CameraWidgetState extends State<CameraWidget> {
     try {
       cameras = await availableCameras();
       controller = CameraController(
-        cameras[1],
-        ResolutionPreset.high,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
+          cameras[0], ResolutionPreset.max, // Adjust the resolution preset
+          imageFormatGroup: ImageFormatGroup.jpeg,
+          enableAudio: true);
       await controller!.initialize();
       setState(() {});
       startTiltListener();
     } on CameraException catch (e) {
-      debugPrint("${e.code} ${e.description}");
+      debugPrint('${e.code} ${e.description}');
     }
   }
 
@@ -67,23 +92,33 @@ class _CameraWidgetState extends State<CameraWidget> {
     DeviceTilt(
       initialTilt: const Tilt(90, 90),
     ).stream.listen((tilt) {
-      if (!mounted) return; // Check if the widget is still mounted
+      if (!mounted) return;
       tiltAngle = tilt.xRadian * (180 / 3.14159265359);
+      isTiltInRange = tiltAngle >= 86 && tiltAngle <= 90;
+      if (isAlertActive && isTiltInRange) {
+        Navigator.of(context).pop();
+        isAlertActive = false; // Reset the flag after dismissing the alert
+      }
 
+      if (!isTiltInRange) {
+        showAlertDialog();
+      }
       if (tiltAngle >= 86 && tiltAngle <= 90 && !isTimerActive && step == 1) {
-        // Capture the first photo
         dynamicAngle = tilt.xRadian * (180 / 3.14159265359);
         captureTimer?.cancel();
         isTimerActive = true;
         secondsLeft = 5;
         captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (!mounted) return; // Check if the widget is still mounted
-
+          if (!mounted) return;
           setState(() {
             secondsLeft = secondsLeft != null ? secondsLeft! - 1 : null;
             if (secondsLeft! <= 0) {
+              if (step == 1) {
+                takeFirstPhoto();
+              } else if (step == 2) {
+                takeSecondPhoto();
+              }
               timer.cancel();
-              takeFirstPhoto(); // Capture and handle the first photo
               isTimerActive = false;
               secondsLeft = null;
             }
@@ -92,36 +127,53 @@ class _CameraWidgetState extends State<CameraWidget> {
       } else if (tiltAngle >= 86 &&
           tiltAngle <= 90 &&
           !isTimerActive &&
-          step == 2) {
-        // Capture the second photo
-        captureTimer?.cancel();
-        isTimerActive = true;
-        secondsLeft = 5;
-        captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          setState(() {
-            secondsLeft = secondsLeft != null ? secondsLeft! - 1 : null;
-            if (secondsLeft! <= 0) {
-              timer.cancel();
-              takeSecondPhoto(); // Capture and handle the second photo
-              isTimerActive = false;
-              secondsLeft = null;
-            }
+          step == 2 &&
+          // hasAlertBeenShown &&
+          !isAlertActive) {
+        // Capture the second photo only if it hasn't been taken yet
+        if (!isSecondPhotoTaken) {
+          captureTimer?.cancel();
+          isTimerActive = true;
+          secondsLeft = 5;
+          captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+            setState(() {
+              secondsLeft = secondsLeft != null ? secondsLeft! - 1 : null;
+              if (secondsLeft! <= 0) {
+                timer.cancel();
+                takeSecondPhoto();
+                isTimerActive = false;
+                secondsLeft = null;
+              }
+            });
           });
-        });
+        }
       } else if (tiltAngle < 86 || tiltAngle > 90) {
-        // Cancel the capture timer if the tilt goes out of range
         captureTimer?.cancel();
-        isTimerActive = false; // Reset timer state
+        isTimerActive = false;
       }
       setState(() {});
     });
   }
 
+  // Future<void> playCaptureSound() async {
+  //   final audioPlayer = AudioPlayer();
+  //   final soundFilePath = 'assets/sounds/capture_sound.mp3'; // Adjust the path to your audio file
+  //   final result = await audioPlayer.play(soundFilePath, isLocal: true);
+  //   if (result == 1) {
+  //     // Successfully started playing the audio
+  //   } else {
+  //     // Failed to play the audio
+  //   }
+  // }
   Future<void> takeFirstPhoto() async {
+    // Capture front photo (first photo)
     try {
       if (controller != null) {
-        // Capture front photo (first photo)
-        final XFile frontPhoto = await controller!.takePicture();
+        setState(() {
+          isCapturing = true; // Set isCapturing to true when capturing starts
+        });
+
+        final frontPhoto = await controller!.takePicture();
         frontPhotoPath = frontPhoto.path;
 
         debugPrint('Front photo captured (first): ${frontPhoto.path}');
@@ -129,19 +181,23 @@ class _CameraWidgetState extends State<CameraWidget> {
         // Set the flag to indicate that the first photo has been taken
         setState(() {
           isFirstPhotoTaken = true;
+          isCapturing =
+          false; // Set isCapturing to false when capturing is completed
         });
 
         // Dispose the camera and cancel the timer
-        controller?.dispose();
-        captureTimer?.cancel();
 
         // Reset the UI and prepare for the second photo
         setState(() {
           step = 2;
           isTimerActive = false;
           secondsLeft = null;
-          initializeCamera();
+          // initializeCamera();
         });
+        // controller?.dispose();
+        captureTimer?.cancel();
+        await initializeCamera();
+        // showReadyForSecondPhotoAlert();
       }
     } catch (e) {
       debugPrint('Error capturing first photo: $e');
@@ -151,20 +207,25 @@ class _CameraWidgetState extends State<CameraWidget> {
   Future<void> takeSecondPhoto() async {
     try {
       if (controller != null && !isSecondPhotoInProgress) {
-        // Check the flag
-        // Capture side photo (second photo)
-        final XFile sidePhoto = await controller!.takePicture();
+        setState(() {
+          isCapturing = true; // Set isCapturing to true when capturing starts
+        });
+        final sidePhoto = await controller!.takePicture();
         sidePhotoPath = sidePhoto.path;
         debugPrint('Side photo captured (second): ${sidePhoto.path}');
 
-        // Set the flag to indicate that the second photo has been taken
         setState(() {
           isSecondPhotoTaken = true;
+          isCapturing =
+          false; // Set isCapturing to false when capturing is completed
         });
 
-        // If both first and second photos are taken, send the request
         if (isFirstPhotoTaken && isSecondPhotoTaken) {
-          sendRequestWithImages(frontPhotoPath!, sidePhotoPath!);
+          // Stop the timer and tilt listener after the second photo is taken
+          captureTimer?.cancel();
+          isTimerActive = false;
+
+          await sendRequestWithImages(frontPhotoPath!, sidePhotoPath!);
           debugPrint('Both photos captured and sent');
         }
       }
@@ -175,7 +236,7 @@ class _CameraWidgetState extends State<CameraWidget> {
 
   Future<String> convertFileToBase64(File file) async {
     final List<int> bytes = await file.readAsBytes();
-    final String base64String = base64Encode(bytes);
+    final base64String = base64Encode(bytes);
     return base64String;
   }
 
@@ -183,31 +244,31 @@ class _CameraWidgetState extends State<CameraWidget> {
     final image = img.decodeImage(imageFile.readAsBytesSync())!;
 
     // Convert quality to an integer (0.6 -> 60)
-    final int compressedQuality = (quality * 100).toInt();
+    final compressedQuality = (quality * 100).toInt();
 
     final compressedImage = img.encodeJpg(image, quality: compressedQuality);
 
     final compressedFile =
-        File(imageFile.path.replaceAll('.jpg', '_compressed.jpg'));
+    File(imageFile.path.replaceAll('.jpg', '_compressed.jpg'));
     await compressedFile.writeAsBytes(compressedImage);
 
     return compressedFile;
   }
 
   Future<void> sendRequestWithImages(
-    String frontPhotoPath,
-    String sidePhotoPath,
-  ) async {
+      String frontPhotoPath,
+      String sidePhotoPath,
+      ) async {
     final cubit = BlocProvider.of<GetUserMeasurementCubit>(context);
-    final cacheUserId = di<SharedPreferences>().get(CacheString.userIdKey);
+    final cacheUserId = di<SharedPreferences>().get(CacheString.mirrorSizeUserIdKey);
 
     // Compress and encode the images
-    final File compressedFrontPhoto = await compressImage(
+    final compressedFrontPhoto = await compressImage(
       File(frontPhotoPath), // Use the actual path here
       0.6,
     );
 
-    final File compressedSidePhoto = await compressImage(
+    final compressedSidePhoto = await compressImage(
       File(sidePhotoPath), // Use the actual path here
       0.6,
     );
@@ -216,8 +277,14 @@ class _CameraWidgetState extends State<CameraWidget> {
     final sideImageBytes = compressedSidePhoto.readAsBytesSync();
     final base64FrontImage = base64Encode(frontImageBytes);
     final base64SideImage = base64Encode(sideImageBytes);
-    final String? cachedDeviceName =
-        di<SharedPreferences>().getString(CacheString.deviceNameKey);
+    final cachedDeviceName =
+    di<SharedPreferences>().getString(CacheString.deviceNameKey);
+    final userEmail =
+    di<SharedPreferences>().get(CacheString.userEmail);
+    debugPrint('The User Email Is $userEmail');
+    final userPhoneNumber =
+    di<SharedPreferences>().get(CacheString.userPhoneNumber);
+    debugPrint('The User userPhoneNumber Is $userPhoneNumber');
 
     final jsonBody = GetMeasurementRequestEntity(
       userId: cacheUserId.toString(),
@@ -225,20 +292,20 @@ class _CameraWidgetState extends State<CameraWidget> {
       height: cubit.userHeight,
       weight: cubit.userWeight,
       age: cubit.userAge,
-      gender: "male",
-      productName: "GET_MEASURED",
-      emailId: "test@test.com",
+      gender: 'male',
+      productName: 'GET_MEASURED',
+      emailId: userEmail.toString()??'',
       userName: cubit.userName,
-      userMobile: "7206422605",
+      userMobile: userPhoneNumber.toString()??'',
       apiKey: AppString.apiKey,
       mobileModel: cachedDeviceName ?? '12ProMax',
-      fitType: "Loosefit",
+      fitType: 'Loosefit',
       merchantId: AppString.merchantID,
       frontImage: base64FrontImage,
       sideImage: base64SideImage,
     );
 
-    BlocProvider.of<GetUserMeasurementCubit>(context)
+    await BlocProvider.of<GetUserMeasurementCubit>(context)
         .uploadToMirrorSize(jsonBody);
   }
 
@@ -251,33 +318,51 @@ class _CameraWidgetState extends State<CameraWidget> {
     super.dispose();
   }
 
+  void resetCapture() {
+    setState(() {
+      isFirstPhotoTaken = false;
+      isSecondPhotoTaken = false;
+      step = 1;
+      isTimerActive = false;
+      secondsLeft = null;
+    });
+    initializeCamera();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final counterWidget = isCapturing
+        ? Text(
+      'Seconds left: $secondsLeft',
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 24.sp,
+        fontWeight: FontWeight.bold,
+      ),
+    )
+        : const SizedBox(); //
     if (controller == null || !controller!.value.isInitialized) {
       return const Center(
         child: CircularProgressIndicator(),
       ); // Display a loader until the controller is initialized
     }
     Color borderColor;
-    String message;
     if (tiltAngle >= 86 && tiltAngle <= 90) {
       borderColor = Colors.green.withOpacity(0.5);
       if (isTimerActive) {
-        message = 'Capture in ${secondsLeft ?? 0} seconds';
-      } else {
-        message = 'Hold still...';
-      }
+      } else {}
     } else {
       borderColor = Colors.red.withOpacity(0.5);
-      message = 'Adjust the tilt angle between 86 and 90 degrees';
     }
     final imageAsset = isFirstPhotoTaken && !isSecondPhotoTaken
         ? 'assets/images/stomachmale.jpg'
         : 'assets/images/character.png';
+    final userSide =
+    isFirstPhotoTaken && !isSecondPhotoTaken ? 'side' : 'front';
     Widget contentWidget;
     if (tiltAngle >= 86 && tiltAngle <= 90) {
       contentWidget =
-          const SizedBox(); // Empty container when not in the specified range
+      const SizedBox(); // Empty container when not in the specified range
     } else {
       contentWidget = Align(
         alignment: Alignment.bottomCenter,
@@ -310,6 +395,15 @@ class _CameraWidgetState extends State<CameraWidget> {
             width: 130.w,
             height: 130.h,
           ),
+          Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                userSide,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium!
+                    .copyWith(color: ColorConstants.primaryColor),
+              )),
           if (isTimerActive)
             Align(
               alignment: Alignment.topCenter,
@@ -330,160 +424,37 @@ class _CameraWidgetState extends State<CameraWidget> {
                 ),
               ),
             ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              'Tilt Angle: ${tiltAngle.toStringAsFixed(0)}°',
+              style: TextStyle(
+                color: Colors.green,
+                fontSize: 18.sp,
+              ),
+            ),
+          ),
           contentWidget,
           MultiBlocListener(
             listeners: [
               BlocListener<GetUserMeasurementCubit, GetUserMeasurementState>(
                 listener: (context, state) {
-                  const bool alreadyFiredNewRequest =
-                      false; // Declare the flag here
+// Declare the flag here
 
-                  // if (state is GetUserMeasurementLoadingState) {
-                  //   return const Center(
-                  //     child: CircularProgressIndicator(),
-                  //   );
-                  // }
-                  if (state is GetUserMeasurementLoadedState) {
-                    final cacheUserId =
-                        di<SharedPreferences>().get(CacheString.userIdKey);
-
-                    if (state.responseEntity.code == '1' &&
-                        !alreadyFiredNewRequest &&
-                        state.responseEntity.message == 'complete') {
-                      // BlocProvider.of<GetRecommendationCubit>(context)
-                      //           .getUserBodyMeasurement(
-                      //         GetRecommendationMeasurementRequestEntity(
-                      //           apiKey: AppString.apiKey,
-                      //           apparelName: 'Kandora',
-                      //           brandName: 'CanCan',
-                      //           merchantId: AppString.merchantID,
-                      //           productName: "GET_MEASURED",
-                      //           gender: AppString.gender,
-                      //           userId: cacheUserId.toString(),
-                      //         ),
-                      //       );
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Kota(),
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text(state.responseEntity.message+state.responseEntity.code),
-                        ),
-                      );
-                    } else {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CustomizeKandoraScreen(),
-                        ),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.red,
-                          content: Text(state.responseEntity.message+state.responseEntity.code),
-                        ),
-                      );
-                    }
-
-                    // return ModalBottomSheetDemo(
-                    //   message: state.responseEntity.message,
-                    //   onClose: () {
-                    //     if (state.responseEntity.code == '1' &&
-                    //         !alreadyFiredNewRequest &&
-                    //         state.responseEntity.message == 'complete') {
-                    //       alreadyFiredNewRequest =
-                    //           true; // Set the flag to prevent multiple requests
-                    //
-                    //       // Fire your network request here
-                    //       BlocProvider.of<GetRecommendationCubit>(context)
-                    //           .getUserBodyMeasurement(
-                    //         GetRecommendationMeasurementRequestEntity(
-                    //           apiKey: AppString.apiKey,
-                    //           apparelName: 'Kandora',
-                    //           brandName: 'CanCan',
-                    //           merchantId: AppString.merchantID,
-                    //           productName: "GET_MEASURED",
-                    //           gender: AppString.gender,
-                    //           userId: cacheUserId.toString(),
-                    //         ),
-                    //       );
-                    //     }
-                    //     BlocListener(
-                    //       listener: (BuildContext context, state) {
-                    //         if (state is GetRecommendationSizeSuccessState) {
-                    //           final cacheUserId =
-                    //           di<SharedPreferences>().get(CacheString.userIdKey);
-                    //
-                    //           BlocProvider.of<UplaodBodyMeasurementCubit>(context)
-                    //               .getUserBodyMeasurement(
-                    //             UploadBodyMeasurementRequestEntity(
-                    //               internalUserId: cacheUserId.toString(),
-                    //               shopifyUserId: cacheUserId.toString(),
-                    //               values: [
-                    //                 ValuesEntity(
-                    //                   title: [
-                    //                     state.responseEntity.measurementData
-                    //                             ?.stomach ??
-                    //                         ''
-                    //                   ],
-                    //                   measurementType: [
-                    //                     state.responseEntity.measurementData
-                    //                             ?.upperNeck ??
-                    //                         ''
-                    //                   ],
-                    //                   kandoraLength: [
-                    //                     double.tryParse(
-                    //                           state.responseEntity.measurementData
-                    //                                   ?.armsLength ??
-                    //                               '',
-                    //                         ) ??
-                    //                         0.0
-                    //                   ],
-                    //                   chest: [
-                    //                     double.tryParse(
-                    //                           state.responseEntity.measurementData
-                    //                                   ?.chest ??
-                    //                               '',
-                    //                         ) ??
-                    //                         0.0
-                    //                   ],
-                    //                   lowHip: [],
-                    //                   shoulder: [],
-                    //                   wrist: [],
-                    //                   waist: [],
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           );
-                    //         }
-                    //       },
-                    //     );
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) => const Kota(),
-                    //       ),
-                    //     );
-                    //   },
-                    //);
-                    //   } else {
-                    //     return Container();
-                    //   }
-                    //   return const Center(
-                    //     child: CircularProgressIndicator(),
-                    //   );
-                    // },
+                  if (state is GetUserMeasurementLoadingState) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return ModalBottomSheetDemo(
+                          resetCapture: resetCapture,
+                        );
+                      },
+                    );
                   }
                 },
               ),
             ],
-            child: const Center(
-              child: CircularProgressIndicator.adaptive(),
-            ),
+            child: Container(),
           )
         ],
       ),

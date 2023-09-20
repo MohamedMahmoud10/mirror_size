@@ -827,7 +827,7 @@ class _$_ValuesResponseModel implements _ValuesResponseModel {
   const _$_ValuesResponseModel(
       {@JsonKey(name: 'value_en') this.valueEn = '',
       @JsonKey(name: 'value_ar') this.valueAr = '',
-      @JsonKey(name: 'Default') this.def = true});
+      @JsonKey(name: 'Default') this.def});
 
   factory _$_ValuesResponseModel.fromJson(Map<String, dynamic> json) =>
       _$$_ValuesResponseModelFromJson(json);

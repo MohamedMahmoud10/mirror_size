@@ -35,7 +35,7 @@ class ValuesResponseEntity with _$ValuesResponseEntity {
   const factory ValuesResponseEntity({
     @Default('') String? valueEn,
     @Default('') String? valueAr,
-    @Default(true) bool? def,
+    bool ?def,
   }) = _ValuesResponseEntity;
 }
 
@@ -71,7 +71,7 @@ class MaterialEntity with _$MaterialEntity {
 @Freezed(fromJson: false, toJson: false)
 class MaterialsEntity with _$MaterialsEntity {
   const factory MaterialsEntity({
-    @Default('')    String? name,
-  @Default('')   String? value,
+    @Default('') String? name,
+    @Default('') String? value,
   }) = _MaterialsEntity;
 }

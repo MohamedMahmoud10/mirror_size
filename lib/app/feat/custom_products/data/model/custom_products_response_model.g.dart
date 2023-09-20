@@ -60,7 +60,7 @@ _$_ValuesResponseModel _$$_ValuesResponseModelFromJson(
     _$_ValuesResponseModel(
       valueEn: json['value_en'] as String? ?? '',
       valueAr: json['value_ar'] as String? ?? '',
-      def: json['Default'] as bool? ?? true,
+      def: json['Default'] as bool?,
     );
 
 _$_MeasurementMappingResponseModel _$$_MeasurementMappingResponseModelFromJson(

@@ -756,7 +756,7 @@ class __$$_ValuesResponseEntityCopyWithImpl<$Res>
 
 class _$_ValuesResponseEntity implements _ValuesResponseEntity {
   const _$_ValuesResponseEntity(
-      {this.valueEn = '', this.valueAr = '', this.def = true});
+      {this.valueEn = '', this.valueAr = '', this.def});
 
   @override
   @JsonKey()
@@ -765,7 +765,6 @@ class _$_ValuesResponseEntity implements _ValuesResponseEntity {
   @JsonKey()
   final String? valueAr;
   @override
-  @JsonKey()
   final bool? def;
 
   @override

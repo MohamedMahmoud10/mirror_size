@@ -1,49 +1,1 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-class ModalBottomSheetDemo extends StatelessWidget {
-  const ModalBottomSheetDemo({
-    super.key,
-    required this.message,
-    required this.onClose, // Add a callback for closing
-  });
-
-  final String message;
-  final VoidCallback onClose; // Callback for closing
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-
-        child: const Text('اضغط هنا'),
-        onPressed: () {
-          Future.delayed(const Duration(seconds: 1), () {
-            showModalBottomSheet<void>(
-              context: context,
-              builder: (BuildContext context) {
-                return SizedBox(
-                  height: 200.h,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(message),
-                        ElevatedButton(
-                          onPressed: () {
-                            onClose(); // Call the onClose callback to close the sheet
-                          },
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          });
-        },
-      ),
-    );
-  }
-}
+import 'package:flutter/material.dart';import 'package:flutter_bloc/flutter_bloc.dart';import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:fstore/appgain_customization/app/feat/get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_state.dart';import 'package:lottie/lottie.dart';import 'package:shared_preferences/shared_preferences.dart';import '../../../../../../../core/common_widgets/custom_elevated_button.dart';import '../../../../../../../core/const/app_strings.dart';import '../../../../../../../core/const/cache_strings.dart';import '../../../../../../../core/const/color_constants.dart';import '../../../../../../../core/di/di.dart';import '../../../../../body_measurement/upload_user_measurement/domain/entity/upload_body_measurement_request_entity.dart';import '../../../../../body_measurement/upload_user_measurement/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';import '../../../../../custom_products/presentation/screens/customize_kandora_screen/customize_kandora_screen.dart';import '../../../../../get_user_measurement_from_mirroir_size/domain/entity/get_recommendation_measurement_request_entity.dart';import '../../../../../get_user_measurement_from_mirroir_size/presentation/cubits/upload_body_measurement/upload_body_measurement_cubit.dart';import '../../../cubit/get_measurement/get_user_measurement_cubit.dart';import '../../../cubit/get_measurement/get_user_measurement_state.dart';class ModalBottomSheetDemo extends StatelessWidget {  const ModalBottomSheetDemo({    super.key,    // required this.message,    required this.resetCapture, // Add a callback for closing  });  // final String message;  final VoidCallback resetCapture; // Callback for closing  @override  Widget build(BuildContext context) {    return AlertDialog(      content: SizedBox(        height: 200.h,        child: MultiBlocListener(          listeners: [            BlocListener<GetRecommendationCubit, GetRecommendationSizeState>(              listener: (context, state) {                if (state is GetRecommendationSizeSuccessState) {                  final cubit =                      BlocProvider.of<GetUserMeasurementCubit>(context);                  final shopifyCachedUserId =                  di<SharedPreferences>().get(CacheString.userIdShopify);                  final appgainCachedUserId =                  di<SharedPreferences>().get(CacheString.userIdAppgain);                  debugPrint('The User Id Coming From Shopify Is $shopifyCachedUserId');                  debugPrint('The User Id Coming From appgain Is $appgainCachedUserId');                  BlocProvider.of<UplaodBodyMeasurementCubit>(                    context,                  ).getUserBodyMeasurement(                    UploadBodyMeasurementRequestEntity(                      internalUserId: appgainCachedUserId.toString(),                      shopifyUserId: shopifyCachedUserId.toString(),                      title: cubit.userTitle,                      measurementType: 'AI',                      kandoraLength: double.tryParse(                            state.responseEntity.measurementData?.armsLength ??                                '',                          ) ??                          0.0,                      chest: double.tryParse(                            state.responseEntity.measurementData                                    ?.shoulderAcross ??                                '',                          ) ??                          0.0,                      lowHip: double.tryParse(                            state.responseEntity.measurementData                                    ?.shoulderAcross ??                                '',                          ) ??                          0.0,                      shoulder: double.tryParse(                            state.responseEntity.measurementData?.stomach ?? '',                          ) ??                          0.0,                      wrist: double.tryParse(                            state.responseEntity.measurementData?.armsLength ??                                '',                          ) ??                          0.0,                      waist: double.tryParse(                            state.responseEntity.measurementData?.upperNeck ??                                '',                          ) ??                          0.0,                    ),                  );                }              },            ),          ],          child: BlocBuilder<GetUserMeasurementCubit, GetUserMeasurementState>(            builder: (context, state) {              if (state is GetUserMeasurementLoadedState) {                if (state.responseEntity.message != 'complete') {                  return Column(                    children: [                      Text(                        state.responseEntity.message,                        style: Theme.of(context)                            .textTheme                            .headlineMedium!                            .copyWith(height: 1.5, fontSize: 18.sp),                        textAlign: TextAlign.center,                        // overflow: TextOverflow.ellipsis,                      ),                      const Spacer(),                      CustomElevatedButton(                        text: 'reset',                        onPressed: () {                          resetCapture();                          Navigator.pop(context);                        },                        color: ColorConstants.primaryColor,                      ),                    ],                  );                } else {                  final cacheUserId = di<SharedPreferences>()                      .get(CacheString.mirrorSizeUserIdKey);                  BlocProvider.of<GetRecommendationCubit>(                    context,                  ).getUserBodyMeasurement(                    GetRecommendationMeasurementRequestEntity(                      apiKey: AppString.apiKey,                      apparelName: 'Kandora',                      brandName: 'CanCan',                      merchantId: AppString.merchantID,                      productName: "GET_MEASURED",                      gender: AppString.gender,                      userId: cacheUserId.toString(),                    ),                  );                  return Column(                    children: [                      const Text('its Okay'),                      Text(                        state.responseEntity.message,                      ),                      TextButton(                        onPressed: () {                          Navigator.of(context).pushReplacement(                            MaterialPageRoute(                              builder: (context) =>                                  const CustomizeKandoraScreen(),                            ),                          );                        },                        child: const Text(                          'Go To Measusrement Screen',                        ),                      )                    ],                  );                }              }              return Container(                child: Lottie.asset('assets/lottie/animation_lmnd6dcy.json'),              );            },          ),        ),      ),    );  }}

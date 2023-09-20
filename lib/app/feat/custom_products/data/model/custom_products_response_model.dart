@@ -47,7 +47,7 @@ class ValuesResponseModel with _$ValuesResponseModel {
   const factory ValuesResponseModel({
     @JsonKey(name: 'value_en') @Default('') String? valueEn,
     @JsonKey(name: 'value_ar') @Default('') String? valueAr,
-    @JsonKey(name: 'Default') @Default(true) bool? def,
+    @JsonKey(name: 'Default')  bool? def,
   }) = _ValuesResponseModel;
 
   factory ValuesResponseModel.fromJson(Map<String, dynamic> json) =>
